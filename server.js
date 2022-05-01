@@ -47,6 +47,7 @@ const io = require("socket.io")(server, {
 //監聽 Server 連線後的所有事件，並捕捉事件 socket 執行
 // socket = 連接端 = 客戶端
 io.on("connection", (socket) => {
+  let user;
   //經過連線後在 console 中印出訊息
   console.log("success connect!");
   //監聽透過 connection 傳進來的事件 someOneSay
@@ -58,8 +59,14 @@ io.on("connection", (socket) => {
 
   //監聽透過 connection 傳進來的事件 someOneCome
   socket.on("someOneCome", (message) => {
+    user = message[0];
     //回傳 message 給發送訊息的 Client
     console.log("event:someOneCome content: " + message);
     io.emit("someOneSay", message);
+    //離開事件
+    socket.once("disconnect", (msg, a) => {
+      console.log(`${user} disconnected`);
+      io.emit("someOneSay", [user, "離開聊天室", new Date().toTimeString()]);
+    });
   });
 });
